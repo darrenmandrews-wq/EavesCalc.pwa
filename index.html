@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Eaves Outrigger Calc</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0b69ff">
+<style>
+  body{font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;margin:0;padding:18px}
+  .card{background:#fff;border-radius:10px;padding:14px;box-shadow:0 6px 18px rgba(15,25,40,.06);margin-bottom:14px}
+  h1{margin:0 0 8px;font-size:20px}
+  label{display:block;margin-top:8px;color:#374151;font-size:13px}
+  input,select,button{margin-top:6px;padding:9px;border:1px solid #d1d5db;border-radius:8px;width:100%;box-sizing:border-box;font-size:14px}
+  button{background:#0b69ff;color:#fff;border:none;cursor:pointer}
+  button:hover{opacity:.95}
+  .muted{color:#6b7280;font-size:13px}
+  .segment-list{margin-top:10px}
+  .segment-item{padding:6px 0;border-bottom:1px solid #eff2f7;font-size:14px}
+  .totals{background:#eef2ff;padding:10px;border-radius:8px;margin-top:10px}
+  .btn-row{display:flex;gap:8px;margin-top:10px}
+  .btn-row button{flex:1}
+  .reset{background:#ef4444}
+  .reset:hover{background:#a71d2a}
+  pre{white-space:pre-wrap;font-family:inherit}
+
+  .report-header{margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #e6edf8}
+  .report-title{font-size:16px;font-weight:700;color:#0b69ff;margin-bottom:6px}
+  .report-meta{font-size:13px;color:#374151}
+
+  @media print {
+    body{background:white;padding:10px}
+    .no-print { display: none !important; }
+    .card{box-shadow:none;border:none;padding:0;margin:0}
+    .segment-item{border:none;padding:3px 0}
+    .totals{background:transparent;padding:6px 0;border-bottom:1px solid #eee}
+    .report-header{display:block;margin-bottom:6px}
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER: Job Address & Date (visible on-screen and printed) -->
+<div class="card report-header">
+  <div class="report-title">Eaves Outrigger Calculation – Job Report</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <div style="flex:2;min-width:220px">
+      <label>Job Address</label>
+      <input id="jobAddress" type="text" placeholder="Enter job address (single line)" />
+    </div>
+    <div style="flex:0.8;min-width:140px">
+      <label>Date</label>
+      <input id="jobDate" type="text" />
+    </div>
+  </div>
+</div>
+
+<!-- MAIN SETTINGS -->
+<div class="card no-print">
+  <h1>Eaves Outrigger Calculator</h1>
+  <div class="muted">Choose eave depth to auto-set outrigger lengths (matches your Excel). Enter segments, Start New Section between eave runs, then Calculate.</div>
+
+  <label>Eave Depth (mm)
+    <select id="eaveDepth">
+      <option value="600" selected>600 mm</option>
+      <option value="450">450 mm</option>
+      <option value="400">400 mm</option>
+    </select>
+  </label>
+
+  <label>Brick outrigger length (mm)
+    <input id="brickLen" type="number" />
+  </label>
+
+  <label>Window outrigger length (mm)
+    <input id="winLen" type="number" />
+  </label>
+
+  <label>Alfresco outrigger length (mm)
+    <input id="alfLen" type="number" />
+  </label>
+
+  <label>Wind Category
+    <select id="windCat">
+      <option value="N2">N2 (600 mm centres)</option>
+      <option value="N3">N3 (450 mm within 1200 mm of ends, 600 elsewhere)</option>
+      <option value="N4">N4 (375 mm within 1200 mm of ends, 400 elsewhere)</option>
+    </select>
+  </label>
+</div>
+
+<!-- SECTION INPUTS -->
+<div class="card no-print">
+  <h2 style="margin:0 0 6px">Section input</h2>
+  <div class="muted">Type the segment length and press <strong>Enter</strong> (or click Add Segment). Use <strong>Start New Section</strong> at the end of an eave run.</div>
+
+  <label>Segment Length (mm)
+    <input id="segLen" type="number" placeholder="e.g. 800" />
+  </label>
+
+  <label>Segment Type
+    <select id="segType">
+      <option value="B">Brick (B)</option>
+      <option value="W">Window (W)</option>
+      <option value="A">Alfresco (A)</option>
+    </select>
+  </label>
+
+  <div class="btn-row">
+    <button id="addBtn">Add Segment</button>
+    <button id="newSectionBtn" style="background:#10b981">Start New Section</button>
+    <button id="resetBtn" class="reset">Reset All</button>
+  </div>
+
+  <div class="segment-list card" id="segmentList" style="margin-top:12px;min-height:80px"></div>
+</div>
+
+<!-- CALCULATE + PRINT -->
+<div class="card">
+  <div class="btn-row no-print" style="margin-bottom:10px">
+    <button id="calcBtn">Calculate Totals</button>
+    <button id="printBtn" style="background:#111827">Print / Save PDF</button>
+  </div>
+
+  <!-- RESULTS: header and totals displayed always (printed too) -->
+  <div id="results"></div>
+</div>
+
+<script>
+/* ======= Presets (reduced by 10mm) ======= */
+const presets = {
+  600: { brick: 610, win: 710, alf: 840 },
+  450: { brick: 460, win: 560, alf: 690 },
+  400: { brick: 410, win: 510, alf: 640 }
+};
+
+/* state */
+let sections = [[]]; // array of sections; each section is array of {len,type}
+
+/* elements */
+const jobAddressEl = document.getElementById('jobAddress');
+const jobDateEl = document.getElementById('jobDate');
+
+const eaveDepthEl = document.getElementById('eaveDepth');
+const brickLenEl  = document.getElementById('brickLen');
+const winLenEl    = document.getElementById('winLen');
+const alfLenEl    = document.getElementById('alfLen');
+const windCatEl   = document.getElementById('windCat');
+
+const segLenEl    = document.getElementById('segLen');
+const segTypeEl   = document.getElementById('segType');
+const addBtn      = document.getElementById('addBtn');
+const newSectionBtn = document.getElementById('newSectionBtn');
+const resetBtn    = document.getElementById('resetBtn');
+const calcBtn     = document.getElementById('calcBtn');
+const printBtn    = document.getElementById('printBtn');
+const segmentList = document.getElementById('segmentList');
+const resultsDiv  = document.getElementById('results');
+
+/* apply preset for eave depth */
+function applyPreset(depth){
+  const p = presets[Number(depth)];
+  if(p){
+    brickLenEl.value = p.brick;
+    winLenEl.value   = p.win;
+    alfLenEl.value   = p.alf;
+  }
+}
+
+/* init date and presets on page load */
+(function init(){
+  const today = new Date();
+  jobDateEl.value = today.toLocaleDateString();
+  applyPreset(eaveDepthEl.value);
+})();
+
+eaveDepthEl.addEventListener('change', ()=> applyPreset(eaveDepthEl.value) );
+
+/* render list */
+function renderSegments(){
+  let html = '';
+  sections.forEach((sec,i)=>{
+    html += `<div style="font-weight:600">Section ${i+1}</div>`;
+    if(sec.length===0) html += `<div style="padding:6px 0;color:#6b7280">(empty)</div>`;
+    sec.forEach((s,j)=>{
+      html += `<div class="segment-item">${j+1}. ${s.len} mm — ${s.type}</div>`;
+    });
+    html += `<div style="height:6px"></div>`;
+  });
+  segmentList.innerHTML = html;
+}
+renderSegments();
+
+/* add segment */
+function addSegment(){
+  const len = Number(segLenEl.value);
+  const type = segTypeEl.value;
+  if(!len || len <= 0){ alert('Enter a valid segment length (mm).'); segLenEl.focus(); return; }
+  sections[sections.length - 1].push({ len: Math.round(len), type });
+  renderSegments();
+  segLenEl.value = '';
+  segLenEl.focus();
+}
+addBtn.addEventListener('click', addSegment);
+segLenEl.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); addSegment(); } });
+
+/* new section */
+newSectionBtn.addEventListener('click', function(){
+  sections.push([]);
+  renderSegments();
+  segLenEl.focus();
+});
+
+/* reset all */
+resetBtn.addEventListener('click', function(){
+  if(!confirm('Clear all sections and results?')) return;
+  sections = [[]];
+  renderSegments();
+  resultsDiv.innerHTML = '';
+  segLenEl.value = '';
+  segLenEl.focus();
+});
+
+/* Calculate — logic unchanged from your Excel macro */
+calcBtn.addEventListener('click', function(){
+  resultsDiv.innerHTML = '';
+  const eaveDepth = Number(eaveDepthEl.value) || 0;
+  const brickLen  = Number(brickLenEl.value)  || 0;
+  const winLen    = Number(winLenEl.value)    || 0;
+  const alfLen    = Number(alfLenEl.value)    || 0;
+  const windCat   = windCatEl.value;
+
+  let grandBrick = 0, grandWin = 0, grandAlf = 0, grandHang = 0;
+  let totalLenMM = 0;
+  let out = '';
+
+  // Build header area for results (job info)
+  const addr = jobAddressEl.value || '';
+  const date = jobDateEl.value || '';
+  out += `<div class="card" style="margin-bottom:10px"><div class="report-title">Eaves Outrigger Calculation – Job Report</div>`;
+  out += `<div class="report-meta">Job: ${addr} ${ addr ? " | " : "" } Date: ${date}</div></div>`;
+
+  sections.forEach((sec, idx) => {
+    if(!sec || sec.length === 0) return;
+
+    const segLens = sec.map(s => s.len);
+    const segTypes = sec.map(s => s.type); // "B","W","A"
+
+    // apply eave depth offset to first segment for sections 2+
+    if(idx >= 1 && segLens.length >= 1) segLens[0] = segLens[0] + eaveDepth;
+
+    const totalSectionLen = segLens.reduce((a,b) => a + b, 0);
+    totalLenMM += totalSectionLen;
+
+    // per-section counters
+    let secBrick = 0, secWin = 0, secAlf = 0, secHang = 0;
+
+    // number of window segments (for +3 hangers each)
+    const windowSegmentsCount = segTypes.filter(t => t === 'W').length;
+
+    // step spacing rules (corner rules)
+    let nearCorner = 600, elsewhere = 600;
+    if(windCat === 'N3'){ nearCorner = 450; elsewhere = 600; }
+    if(windCat === 'N4'){ nearCorner = 375; elsewhere = 400; }
+
+    // Step cumulatively across the section from 0 to totalSectionLen
+    let cumPos = 0;
+    while(cumPos <= totalSectionLen){
+      let stepSize = (cumPos <= 1200 || ((totalSectionLen - cumPos) <= 1200)) ? nearCorner : elsewhere;
+
+      // find the segment index that contains cumPos
+      let segStart = 0, segIdx = 0;
+      for(let k=1;k<=segLens.length;k++){ const segEnd = segStart + segLens[k-1]; if(cumPos <= segEnd){ segIdx = k-1; break; } segStart = segEnd; }
+      if(segIdx < 0) segIdx = 0;
+      const t = segTypes[segIdx];
+
+      // register outrigger to the segment type
+      if(t === 'B') secBrick++;
+      else if(t === 'W') secWin++;
+      else if(t === 'A') secAlf++;
+      else secBrick++;
+
+      // double outriggers at exact multiples of 2400 (global from 0)
+      if(cumPos > 0 && (cumPos % 2400) === 0){
+        if(t === 'B') secBrick++;
+        else if(t === 'W') secWin++;
+        else if(t === 'A') secAlf++;
+      }
+
+      // advance
+      cumPos = cumPos + stepSize;
+    }
+
+    // forced extra outriggers at each window start and end (+2 per window segment)
+    for(let k=0, segPosStart=0;k<segLens.length;k++){
+      if(segTypes[k] === 'W'){ secWin += 2; }
+      segPosStart += segLens[k];
+    }
+
+    // Force a double at the end of each section (double outrigger of last segment type)
+    const endType = segTypes[segTypes.length - 1];
+    if(endType === 'B'){ secBrick += 2; }
+    else if(endType === 'W'){ secWin += 2; }
+    else if(endType === 'A'){ secAlf += 2; }
+
+    // HANGERS for the section: floor(totalSectionLen/1200) + 3 per window segment
+    secHang = Math.floor(totalSectionLen / 1200) + (windowSegmentsCount * 3);
+
+    // accumulate grand totals (no per-section listing required)
+    grandBrick += secBrick;
+    grandWin += secWin;
+    grandAlf += secAlf;
+    grandHang += secHang;
+  });
+
+  const totalMetres = Math.round(totalLenMM / 1000);
+  out += `<div class="totals"><strong>GRAND TOTALS:</strong><br>Brick: ${grandBrick} (${brickLenEl.value}) &nbsp;|&nbsp; Window: ${grandWin} (${winLenEl.value}) &nbsp;|&nbsp; Alfresco: ${grandAlf} (${alfLenEl.value}) &nbsp;|&nbsp; Hangers: ${grandHang} &nbsp;|&nbsp; Plate + Batten: ${totalMetres} m (plus 2 stock lengths)</div>`;
+
+  resultsDiv.innerHTML = out;
+  resultsDiv.scrollIntoView({behavior:'smooth'});
+});
+
+/* Print button: opens browser print dialog (Save as PDF) */
+document.getElementById('printBtn').addEventListener('click', function(){ window.print(); });
+
+/* service worker registration (if supported) */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js').catch(function(err){ console.log('SW registration failed:', err); });
+}
+</script>
+
+</body>
+</html>
