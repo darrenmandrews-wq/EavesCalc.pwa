@@ -57,8 +57,8 @@
 
 <!-- MAIN SETTINGS -->
 <div class="card no-print">
-  <h1>Eaves Outrigger Calculator</h1>
-  <div class="muted">Choose eave depth to auto-set outrigger lengths (matches your Excel). Enter segments, Start New Section between eave runs, then Calculate.</div>
+  <h1>Metal Eaves Outrigger Calculator</h1>
+  <div class="muted">Choose eave depth to auto-set outrigger lengths. Enter segments, Start New Section between eave runs, then Calculate.</div>
 
   <label>Eave Depth (mm)
     <select id="eaveDepth">
@@ -314,7 +314,17 @@ calcBtn.addEventListener('click', function(){
   });
 
   const totalMetres = Math.round(totalLenMM / 1000);
-  out += `<div class="totals"><strong>GRAND TOTALS:</strong><br>Brick: ${grandBrick} (${brickLenEl.value}) &nbsp;|&nbsp; Window: ${grandWin} (${winLenEl.value}) &nbsp;|&nbsp; Alfresco: ${grandAlf} (${alfLenEl.value}) &nbsp;|&nbsp; Hangers: ${grandHang} &nbsp;|&nbsp; Plate + Batten: ${totalMetres} m (plus 2 stock lengths)</div>`;
+ // Apply 10% extra (rounded up to whole numbers)
+const adjBrick = Math.ceil(grandBrick * 1.1);
+const adjWin   = Math.ceil(grandWin * 1.1);
+const adjAlf   = Math.ceil(grandAlf * 1.1);
+
+out += `<div class="totals"><strong>GRAND TOTALS (incl. 10% extra):</strong><br>
+Brick: ${adjBrick} (${brickLenEl.value}) &nbsp;|&nbsp;
+Window: ${adjWin} (${winLenEl.value}) &nbsp;|&nbsp;
+Alfresco: ${adjAlf} (${alfLenEl.value}) &nbsp;|&nbsp;
+Hangers: ${grandHang} &nbsp;|&nbsp;
+Plate + Batten: ${totalMetres} m (plus 2 stock lengths)</div>`;
 
   resultsDiv.innerHTML = out;
   resultsDiv.scrollIntoView({behavior:'smooth'});
