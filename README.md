@@ -50,16 +50,3 @@ Works offline and can be installed on both Android and iPhone.
 - To force updates, bump the cache version in `service-worker.js`:  
 ```js
 const CACHE_NAME = "eavescalc-v2";
-## 📄 License
-
-### Proprietary License
-Copyright © 2025 DKA. All rights reserved.
-
-This software and its source code are proprietary and confidential.  
-You may use the deployed application for its intended purpose, but you may not:
-- Copy, modify, or distribute the source code.  
-- Use the source code for commercial purposes without explicit written permission.  
-- Reverse engineer or attempt to extract the underlying code.  
-
-The author retains all rights to the code, design, and intellectual property.  
-Unauthorized use, reproduction, or distribution of this software is strictly prohibited.
