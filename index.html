@@ -1,32 +1,12 @@
-l<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Eaves Outrigger Calc</title>
-
-  <!-- Web App Manifest -->
-  <link rel="manifest" href="/EavesCalc.pwa/manifest.webmanifest">
-
-  <!-- App Icons -->
-  <link rel="apple-touch-icon" sizes="192x192" href="/EavesCalc.pwa/icon-192.png">
-  <link rel="apple-touch-icon" sizes="512x512" href="/EavesCalc.pwa/icon-512.png">
-
-  <!-- Favicon -->
-  <link rel="icon" href="/EavesCalc.pwa/favicon.ico" type="image/x-icon">
-
-  <!-- Styles and Scripts -->
-  <link rel="stylesheet" href="/EavesCalc.pwa/style.css">
-  <script src="/EavesCalc.pwa/script.js" defer></script>
-</head>
-  <!-- Theme color for browser UI -->
-  <meta name="theme-color" content="#0b69ff">
-
-  <!-- Your inline styles start here -->
-  <style>
-    /* your CSS rules */
-  </style>
-</head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title> Eaves Outrigger Calc</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0b69ff">
+<style>
   body{font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;margin:0;padding:18px}
   .card{background:#fff;border-radius:10px;padding:14px;box-shadow:0 6px 18px rgba(15,25,40,.06);margin-bottom:14px}
   h1{margin:0 0 8px;font-size:20px}
@@ -78,7 +58,7 @@ l<!doctype html>
 <!-- MAIN SETTINGS -->
 <div class="card no-print">
   <h1>Metal Eaves Outrigger Calculator</h1>
-  <div class="muted">Choose eave depth to auto-set outrigger lengths. Enter segments, Start New Section between eave runs, then Calculate.</div>
+  <div class="muted">Choose eave depth to auto-set outrigger lengths (matches your Excel). Enter segments, Start New Section between eave runs, then Calculate.</div>
 
   <label>Eave Depth (mm)
     <select id="eaveDepth">
@@ -334,17 +314,7 @@ calcBtn.addEventListener('click', function(){
   });
 
   const totalMetres = Math.round(totalLenMM / 1000);
- // Apply 10% extra (rounded up to whole numbers)
-const adjBrick = Math.ceil(grandBrick * 1.1);
-const adjWin   = Math.ceil(grandWin * 1.1);
-const adjAlf   = Math.ceil(grandAlf * 1.1);
-
-out += `<div class="totals"><strong>GRAND TOTALS (incl. 10% extra):</strong><br>
-Brick: ${adjBrick} (${brickLenEl.value}) &nbsp;|&nbsp;
-Window: ${adjWin} (${winLenEl.value}) &nbsp;|&nbsp;
-Alfresco: ${adjAlf} (${alfLenEl.value}) &nbsp;|&nbsp;
-Hangers: ${grandHang} &nbsp;|&nbsp;
-Plate + Batten: ${totalMetres} m (plus 2 stock lengths)</div>`;
+  out += `<div class="totals"><strong>GRAND TOTALS:</strong><br>Brick: ${grandBrick} (${brickLenEl.value}) &nbsp;|&nbsp; Window: ${grandWin} (${winLenEl.value}) &nbsp;|&nbsp; Alfresco: ${grandAlf} (${alfLenEl.value}) &nbsp;|&nbsp; Hangers: ${grandHang} &nbsp;|&nbsp; Plate + Batten: ${totalMetres} m (plus 2 stock lengths)</div>`;
 
   resultsDiv.innerHTML = out;
   resultsDiv.scrollIntoView({behavior:'smooth'});
@@ -353,13 +323,16 @@ Plate + Batten: ${totalMetres} m (plus 2 stock lengths)</div>`;
 /* Print button: opens browser print dialog (Save as PDF) */
 document.getElementById('printBtn').addEventListener('click', function(){ window.print(); });
 
-<!-- Service worker registration (if supported) -->
-<script>
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("/EavesCalc.pwa/service-worker.js")
-      .then(reg => console.log("Service worker registered:", reg))
-      .catch(err => console.error("SW registration failed:", err));
-  }
+/* service worker registration (if supported) */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js').catch(function(err){ console.log('SW registration failed:', err); });
+}
 </script>
+
+<footer>
+  <p><a href="about.html">About / Help</a></p>
+</footer>
+
+
 </body>
 </html>
