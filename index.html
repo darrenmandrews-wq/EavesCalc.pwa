@@ -356,10 +356,7 @@ document.getElementById('printBtn').addEventListener('click', function(){ window
 <!-- Service worker registration (if supported) -->
 <script>
   if ("serviceWorker" in navigator) {
-    // Always register relative to the current location
-    const swPath = "./service-worker.js";
-
-    navigator.serviceWorker.register(swPath)
+    navigator.serviceWorker.register("/EavesCalc.pwa/service-worker.js")
       .then(reg => console.log("Service worker registered:", reg))
       .catch(err => console.error("SW registration failed:", err));
   }
