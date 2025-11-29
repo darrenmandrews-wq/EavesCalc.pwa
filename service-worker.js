@@ -27,7 +27,6 @@ self.addEventListener("install", event => {
   );
 });
   self.skipWaiting(); // activate immediately
-});
 
 // Activate event: clear old caches
 self.addEventListener("activate", event => {
