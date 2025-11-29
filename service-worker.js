@@ -1,5 +1,5 @@
 // Update this version string each time you deploy new code
-const CACHE_NAME = "eavescalc-v2";
+const CACHE_NAME = "eavescalc-v4";
 
 // List of files to cache (use relative paths for GitHub + Netlify)
 const FILES_TO_CACHE = [
