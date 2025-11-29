@@ -41,16 +41,16 @@
 </head>
 <body>
 
-<!-- HEADER: Job Address & Date (visible on-screen and printed) -->
+<!-- HEADER: Job Address & Date -->
 <div class="card report-header">
   <div class="report-title">Metal Eaves Outrigger Calculation – Job Report</div>
   <div style="display:flex;gap:8px;flex-wrap:wrap">
     <div style="flex:2;min-width:220px">
-      <label>Job Address</label>
+      <label for="jobAddress">Job Address</label>
       <input id="jobAddress" type="text" placeholder="Enter job address (single line)" />
     </div>
     <div style="flex:0.8;min-width:140px">
-      <label>Date</label>
+      <label for="jobDate">Date</label>
       <input id="jobDate" type="text" />
     </div>
   </div>
@@ -59,53 +59,46 @@
 <!-- MAIN SETTINGS -->
 <div class="card no-print">
   <h1>Metal Eaves Outrigger Calculator</h1>
-  <div class="muted">Choose eave depth to auto-set outrigger lengths (matches your Excel). Enter segments, Start New Section between eave runs, then Calculate.</div>
+  <div class="muted">Choose eave depth to auto-set outrigger lengths...</div>
 
-  <label>Eave Depth (mm)
-    <select id="eaveDepth">
-      <option value="600" selected>600 mm</option>
-      <option value="450">450 mm</option>
-      <option value="400">400 mm</option>
-    </select>
-  </label>
+  <label for="eaveDepth">Eave Depth (mm)</label>
+  <select id="eaveDepth">
+    <option value="600" selected>600 mm</option>
+    <option value="450">450 mm</option>
+    <option value="400">400 mm</option>
+  </select>
 
-  <label>Brick outrigger length (mm)
-    <input id="brickLen" type="number" />
-  </label>
+  <label for="brickLen">Brick outrigger length (mm)</label>
+  <input id="brickLen" type="number" />
 
-  <label>Window outrigger length (mm)
-    <input id="winLen" type="number" />
-  </label>
+  <label for="winLen">Window outrigger length (mm)</label>
+  <input id="winLen" type="number" />
 
-  <label>Alfresco outrigger length (mm)
-    <input id="alfLen" type="number" />
-  </label>
+  <label for="alfLen">Alfresco outrigger length (mm)</label>
+  <input id="alfLen" type="number" />
 
-  <label>Wind Category
-    <select id="windCat">
-      <option value="N2">N2 (600 mm centres)</option>
-      <option value="N3">N3 (450 mm within 1200 mm of ends, 600 elsewhere)</option>
-      <option value="N4">N4 (375 mm within 1200 mm of ends, 400 elsewhere)</option>
-    </select>
-  </label>
+  <label for="windCat">Wind Category</label>
+  <select id="windCat">
+    <option value="N2">N2 (600 mm centres)</option>
+    <option value="N3">N3 (450 mm within 1200 mm of ends, 600 elsewhere)</option>
+    <option value="N4">N4 (375 mm within 1200 mm of ends, 400 elsewhere)</option>
+  </select>
 </div>
 
 <!-- SECTION INPUTS -->
 <div class="card no-print">
   <h2 style="margin:0 0 6px">Section input</h2>
-  <div class="muted">Type the segment length and press <strong>Enter</strong> (or click Add Segment). Use <strong>Start New Section</strong> at the end of an eave run.</div>
+  <div class="muted">Type the segment length and press Enter...</div>
 
-  <label>Segment Length (mm)
-    <input id="segLen" type="number" placeholder="e.g. 800" />
-  </label>
+  <label for="segLen">Segment Length (mm)</label>
+  <input id="segLen" type="number" placeholder="e.g. 800" />
 
-  <label>Segment Type
-    <select id="segType">
-      <option value="B">Brick (B)</option>
-      <option value="W">Window (W)</option>
-      <option value="A">Alfresco (A)</option>
-    </select>
-  </label>
+  <label for="segType">Segment Type</label>
+  <select id="segType">
+    <option value="B">Brick (B)</option>
+    <option value="W">Window (W)</option>
+    <option value="A">Alfresco (A)</option>
+  </select>
 
   <div class="btn-row">
     <button id="addBtn">Add Segment</button>
@@ -122,6 +115,14 @@
     <button id="calcBtn">Calculate Totals</button>
     <button id="printBtn" style="background:#111827">Print / Save PDF</button>
   </div>
+  <div id="results"></div>
+</div>
+
+<footer>
+  <p><a href="about.html">About / Help</a></p>
+</footer>
+
+</body>
 
   <!-- RESULTS: header and totals displayed always (printed too) -->
   <div id="results"></div>
