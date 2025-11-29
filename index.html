@@ -333,11 +333,18 @@ Plate + Batten: ${totalMetres} m (plus 2 stock lengths)</div>`;
 /* Print button: opens browser print dialog (Save as PDF) */
 document.getElementById('printBtn').addEventListener('click', function(){ window.print(); });
 
-/* service worker registration (if supported) */
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('service-worker.js').catch(function(err){ console.log('SW registration failed:', err); });
-}
-</script>
+<!-- Service worker registration (if supported) -->
+<script>
+  if ("serviceWorker" in navigator) {
+    // Detect if we're running under GitHub Pages (subpath) or Netlify (root)
+    const swPath = window.location.pathname.includes("eavescalc")
+      ? "/eavescalc/service-worker.js"
+      : "/service-worker.js";
 
+    navigator.serviceWorker.register(swPath)
+      .then(reg => console.log("Service worker registered:", reg))
+      .catch(err => console.error("SW registration failed:", err));
+  }
+</script>
 </body>
 </html>
