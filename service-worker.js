@@ -1,21 +1,22 @@
 // Version bump forces a fresh install
-const CACHE_NAME = "eavescalc-v4";
+const CACHE_NAME = "eavescalc-v16"; // increment each deploy
 
-// List of files to cache (use relative paths for GitHub + Netlify)
+// List of files to cache (GitHub Pages paths must include /EavesCalc.pwa/)
 const FILES_TO_CACHE = [
-  "./",                   // root
-  "./index.html",
-  "./manifest.webmanifest",
-  "./style.css",
-  "./script.js",
-  "./favicon.ico"          // include favicon now that it exists
+  "/EavesCalc.pwa/",
+  "/EavesCalc.pwa/index.html",
+  "/EavesCalc.pwa/manifest.webmanifest",
+  "/EavesCalc.pwa/style.css",
+  "/EavesCalc.pwa/script.js",
+  "/EavesCalc.pwa/favicon.ico",
+  "/EavesCalc.pwa/icon-192.png",
+  "/EavesCalc.pwa/icon-512.png"
 ];
 
 // Install event: cache files
 self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      // Try caching each file individually so one 404 doesn't break everything
       return Promise.all(
         FILES_TO_CACHE.map(url =>
           cache.add(url).catch(err =>
@@ -25,8 +26,8 @@ self.addEventListener("install", event => {
       );
     })
   );
-});
   self.skipWaiting(); // activate immediately
+});
 
 // Activate event: clear old caches
 self.addEventListener("activate", event => {
