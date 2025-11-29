@@ -1,20 +1,27 @@
 // Update this version string each time you deploy new code
-const CACHE_NAME = "eavescalc-v1";
+const CACHE_NAME = "eavescalc-v2";
 
-// List of files to cache (adjust paths if needed)
+// List of files to cache (use relative paths for GitHub + Netlify)
 const FILES_TO_CACHE = [
-  "/",                  // root
-  "/index.html",
-  "/manifest.webmanifest",
-  "/style.css",         // if you have a CSS file
-  "/script.js"          // if you have a JS file
+  "./",                   // root
+  "./index.html",
+  "./manifest.webmanifest",
+  "./style.css",
+  "./script.js"
 ];
 
 // Install event: cache files
 self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(FILES_TO_CACHE);
+      // Try caching each file individually so one 404 doesn't break everything
+      return Promise.all(
+        FILES_TO_CACHE.map(url =>
+          cache.add(url).catch(err =>
+            console.error("Failed to cache:", url, err)
+          )
+        )
+      );
     })
   );
   self.skipWaiting(); // activate immediately
