@@ -1,4 +1,4 @@
-// Update this version string each time you deploy new code
+// Version bump forces a fresh install
 const CACHE_NAME = "eavescalc-v4";
 
 // List of files to cache (use relative paths for GitHub + Netlify)
@@ -7,7 +7,8 @@ const FILES_TO_CACHE = [
   "./index.html",
   "./manifest.webmanifest",
   "./style.css",
-  "./script.js"
+  "./script.js",
+  "./favicon.ico"          // include favicon now that it exists
 ];
 
 // Install event: cache files
@@ -24,6 +25,7 @@ self.addEventListener("install", event => {
       );
     })
   );
+});
   self.skipWaiting(); // activate immediately
 });
 
