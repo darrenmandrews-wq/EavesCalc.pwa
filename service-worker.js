@@ -6,8 +6,7 @@ const FILES_TO_CACHE = [
   "/EavesCalc.pwa/",
   "/EavesCalc.pwa/index.html",
   "/EavesCalc.pwa/manifest.webmanifest",
-  "/EavesCalc.pwa/style.css",
-  "/EavesCalc.pwa/script.js",
+
   "/EavesCalc.pwa/favicon.ico",
   "/EavesCalc.pwa/icon-192.png",
   "/EavesCalc.pwa/icon-512.png"
